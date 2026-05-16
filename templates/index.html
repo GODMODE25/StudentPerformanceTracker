@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Student Performance Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Hero Section -->
+        <div class="text-center py-5">
+            <div class="container">
+                <i class="fas fa-graduation-cap display-1 text-primary mb-4"></i>
+                <h1 class="display-4 fw-bold mb-4">Student Performance Tracker</h1>
+                <p class="lead mb-4">
+                    Empowering education through comprehensive performance tracking and seamless communication 
+                    between teachers and parents.
+                </p>
+                
+                {% if not current_user.is_authenticated %}
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg me-md-2">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Register
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row g-4 my-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Performance Tracking</h5>
+                <p class="card-text">
+                    Monitor student academic progress with detailed grade tracking, 
+                    attendance monitoring, and comprehensive performance analytics.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-comments fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Communication Hub</h5>
+                <p class="card-text">
+                    Facilitate seamless communication between teachers and parents 
+                    with built-in messaging and notification systems.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-file-alt fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Detailed Reports</h5>
+                <p class="card-text">
+                    Generate comprehensive reports on student performance, attendance patterns, 
+                    and academic trends for informed decision making.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Roles Section -->
+<div class="row my-5">
+    <div class="col-12">
+        <h2 class="text-center mb-5">Designed for All Educational Stakeholders</h2>
+    </div>
+</div>
+
+<div class="centered-cards g-4">
+    <div class="card border-primary">
+        <div class="card-body text-center">
+            <i class="fas fa-user-shield fa-2x text-primary mb-3"></i>
+            <h5 class="card-title">Administrators</h5>
+            <ul class="list-unstyled text-start">
+                <li><i class="fas fa-check text-success me-2"></i>User management</li>
+                <li><i class="fas fa-check text-success me-2"></i>System reports</li>
+                <li><i class="fas fa-check text-success me-2"></i>Overall analytics</li>
+                <li><i class="fas fa-check text-success me-2"></i>Data oversight</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="card border-info">
+        <div class="card-body text-center">
+            <i class="fas fa-chalkboard-teacher fa-2x text-info mb-3"></i>
+            <h5 class="card-title">Teachers</h5>
+            <ul class="list-unstyled text-start">
+                <li><i class="fas fa-check text-success me-2"></i>Grade management</li>
+                <li><i class="fas fa-check text-success me-2"></i>Attendance tracking</li>
+                <li><i class="fas fa-check text-success me-2"></i>Parent communication</li>
+                <li><i class="fas fa-check text-success me-2"></i>Discipline records</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="card border-success">
+        <div class="card-body text-center">
+            <i class="fas fa-users fa-2x text-success mb-3"></i>
+            <h5 class="card-title">Parents</h5>
+            <ul class="list-unstyled text-start">
+                <li><i class="fas fa-check text-success me-2"></i>Monitor progress</li>
+                <li><i class="fas fa-check text-success me-2"></i>View attendance</li>
+                <li><i class="fas fa-check text-success me-2"></i>Communicate with teachers</li>
+                <li><i class="fas fa-check text-success me-2"></i>Receive updates</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% if not current_user.is_authenticated %}
+<!-- Call to Action -->
+<div class="row my-5">
+    <div class="col-12">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center py-5">
+                <h3 class="card-title">Ready to Get Started?</h3>
+                <p class="card-text lead">
+                    Join thousands of educational institutions already using our platform to enhance student success.
+                </p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg me-md-2">
+                        <i class="fas fa-user-plus me-2"></i>Create Account
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

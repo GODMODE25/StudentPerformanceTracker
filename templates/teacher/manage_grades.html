@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Grades - Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-star me-2"></i>Manage Grades</h1>
+    <a href="{{ url_for('teacher.add_grade') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Add New Grade
+    </a>
+</div>
+
+<!-- Filter and Search -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="subjectFilter" class="form-label">Filter by Subject:</label>
+                <select class="form-select" id="subjectFilter">
+                    <option value="">All Subjects</option>
+                    {% for subject in teacher.subjects %}
+                    <option value="{{ subject }}">{{ subject }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="classFilter" class="form-label">Filter by Class:</label>
+                <select class="form-select" id="classFilter">
+                    <option value="">All Classes</option>
+                    {% for class_name in teacher.classes %}
+                    <option value="{{ class_name }}">{{ class_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="studentSearch" class="form-label">Search Student:</label>
+                <input type="text" class="form-control" id="studentSearch" placeholder="Enter student name...">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grades Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">All Grades</h5>
+    </div>
+    <div class="card-body">
+        {% if grades %}
+        <div class="table-responsive">
+            <table class="table table-striped" id="gradesTable">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Exam Type</th>
+                        <th>Marks</th>
+                        <th>Percentage</th>
+                        <th>Date</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grade in grades %}
+                    <tr data-subject="{{ grade.subject }}" data-class="{{ grade.student.student_profile.class_name }}" data-student="{{ grade.student.full_name|lower }}">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-graduate me-2 text-info"></i>
+                                {{ grade.student.full_name }}
+                            </div>
+                        </td>
+                        <td>{{ grade.student.student_profile.class_name }}</td>
+                        <td>
+                            <span class="badge bg-primary">{{ grade.subject }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ grade.exam_type.title() }}</span>
+                        </td>
+                        <td>{{ grade.marks }}/{{ grade.max_marks }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if grade.percentage >= 80 else 'warning' if grade.percentage >= 60 else 'danger' }}">
+                                {{ grade.percentage|round(1) }}%
+                            </span>
+                        </td>
+                        <td>{{ grade.date.strftime('%b %d, %Y') }}</td>
+                        <td>
+                            {% if grade.percentage >= 90 %}
+                                <span class="badge bg-success">A</span>
+                            {% elif grade.percentage >= 80 %}
+                                <span class="badge bg-info">B</span>
+                            {% elif grade.percentage >= 70 %}
+                                <span class="badge bg-warning">C</span>
+                            {% elif grade.percentage >= 60 %}
+                                <span class="badge bg-secondary">D</span>
+                            {% else %}
+                                <span class="badge bg-danger">F</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-star fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No grades entered yet</h5>
+            <p class="text-muted">Start by adding grades for your students</p>
+            <a href="{{ url_for('teacher.add_grade') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Add First Grade
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Students Overview -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-users me-2"></i>Your Students</h5>
+            </div>
+            <div class="card-body">
+                {% if students %}
+                <div class="row">
+                    {% for student in students %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-info">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ student.user.full_name }}</h6>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        Student ID: {{ student.student_id }}<br>
+                                        Class: {{ student.class_name }}
+                                    </small>
+                                </p>
+                                <a href="{{ url_for('teacher.add_grade') }}?student_id={{ student.user_id }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-plus me-1"></i>Add Grade
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">No students found in your classes</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const subjectFilter = document.getElementById('subjectFilter');
+    const classFilter = document.getElementById('classFilter');
+    const studentSearch = document.getElementById('studentSearch');
+    const table = document.getElementById('gradesTable');
+    
+    function filterTable() {
+        const subjectValue = subjectFilter.value.toLowerCase();
+        const classValue = classFilter.value.toLowerCase();
+        const searchValue = studentSearch.value.toLowerCase();
+        
+        if (!table) return;
+        
+        const rows = table.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+            const subject = row.dataset.subject.toLowerCase();
+            const className = row.dataset.class.toLowerCase();
+            const student = row.dataset.student.toLowerCase();
+            
+            const subjectMatch = !subjectValue || subject.includes(subjectValue);
+            const classMatch = !classValue || className.includes(classValue);
+            const studentMatch = !searchValue || student.includes(searchValue);
+            
+            if (subjectMatch && classMatch && studentMatch) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    subjectFilter.addEventListener('change', filterTable);
+    classFilter.addEventListener('change', filterTable);
+    studentSearch.addEventListener('input', filterTable);
+});
+</script>
+{% endblock %}

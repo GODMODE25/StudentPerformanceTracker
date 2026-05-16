@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Mark Attendance - Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-calendar-plus me-2"></i>Mark Attendance</h1>
+    <a href="{{ url_for('teacher.manage_attendance') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Attendance
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-clipboard-check me-2"></i>Mark Student Attendance</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="attendanceForm">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="attendance_date" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Date *
+                            </label>
+                            <input type="date" class="form-control" id="attendance_date" name="attendance_date" 
+                                   value="{{ today }}" max="{{ today }}" required>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <div class="btn-group" role="group" aria-label="Quick actions">
+                                <button type="button" class="btn btn-success" onclick="markAll('present')">
+                                    <i class="fas fa-check me-1"></i>Mark All Present
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="markAll('absent')">
+                                    <i class="fas fa-times me-1"></i>Mark All Absent
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if students %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Class</th>
+                                    <th>Status</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-graduate me-2 text-info"></i>
+                                            <div>
+                                                <strong>{{ student.user.full_name }}</strong><br>
+                                                <small class="text-muted">ID: {{ student.student_id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ student.class_name }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group" aria-label="Attendance status">
+                                            <input type="radio" class="btn-check" name="status_{{ student.user_id }}" 
+                                                   id="present_{{ student.user_id }}" value="present" autocomplete="off">
+                                            <label class="btn btn-outline-success" for="present_{{ student.user_id }}">
+                                                <i class="fas fa-check me-1"></i>Present
+                                            </label>
+
+                                            <input type="radio" class="btn-check" name="status_{{ student.user_id }}" 
+                                                   id="absent_{{ student.user_id }}" value="absent" autocomplete="off">
+                                            <label class="btn btn-outline-danger" for="absent_{{ student.user_id }}">
+                                                <i class="fas fa-times me-1"></i>Absent
+                                            </label>
+
+                                            <input type="radio" class="btn-check" name="status_{{ student.user_id }}" 
+                                                   id="late_{{ student.user_id }}" value="late" autocomplete="off">
+                                            <label class="btn btn-outline-warning" for="late_{{ student.user_id }}">
+                                                <i class="fas fa-clock me-1"></i>Late
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm" 
+                                               name="remarks_{{ student.user_id }}" 
+                                               placeholder="Optional remarks">
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Attendance Summary -->
+                    <div class="card bg-light mt-4" id="attendanceSummary" style="display: none;">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-chart-pie me-2"></i>Attendance Summary</h6>
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <span class="badge bg-success fs-6" id="presentCount">0</span>
+                                    <br><small class="text-muted">Present</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="badge bg-danger fs-6" id="absentCount">0</span>
+                                    <br><small class="text-muted">Absent</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="badge bg-warning fs-6" id="lateCount">0</span>
+                                    <br><small class="text-muted">Late</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="badge bg-secondary fs-6" id="notMarkedCount">{{ students|length }}</span>
+                                    <br><small class="text-muted">Not Marked</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{{ url_for('teacher.manage_attendance') }}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Attendance
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No students found</h5>
+                        <p class="text-muted">No students are assigned to your classes</p>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const attendanceInputs = document.querySelectorAll('input[type="radio"][name^="status_"]');
+    const attendanceSummary = document.getElementById('attendanceSummary');
+    const presentCount = document.getElementById('presentCount');
+    const absentCount = document.getElementById('absentCount');
+    const lateCount = document.getElementById('lateCount');
+    const notMarkedCount = document.getElementById('notMarkedCount');
+    
+    function updateSummary() {
+        let present = 0, absent = 0, late = 0, notMarked = 0;
+        
+        const studentIds = [...new Set(Array.from(attendanceInputs).map(input => 
+            input.name.replace('status_', '')))];
+        
+        studentIds.forEach(studentId => {
+            const checkedInput = document.querySelector(`input[name="status_${studentId}"]:checked`);
+            if (checkedInput) {
+                switch(checkedInput.value) {
+                    case 'present': present++; break;
+                    case 'absent': absent++; break;
+                    case 'late': late++; break;
+                }
+            } else {
+                notMarked++;
+            }
+        });
+        
+        presentCount.textContent = present;
+        absentCount.textContent = absent;
+        lateCount.textContent = late;
+        notMarkedCount.textContent = notMarked;
+        
+        if (present + absent + late > 0) {
+            attendanceSummary.style.display = 'block';
+        }
+    }
+    
+    attendanceInputs.forEach(input => {
+        input.addEventListener('change', updateSummary);
+    });
+});
+
+function markAll(status) {
+    const inputs = document.querySelectorAll(`input[type="radio"][value="${status}"]`);
+    inputs.forEach(input => {
+        input.checked = true;
+    });
+    
+    // Trigger change event to update summary
+    if (inputs.length > 0) {
+        inputs[0].dispatchEvent(new Event('change'));
+    }
+}
+
+// Form validation
+document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+    const checkedInputs = document.querySelectorAll('input[type="radio"]:checked');
+    
+    if (checkedInputs.length === 0) {
+        e.preventDefault();
+        alert('Please mark attendance for at least one student.');
+        return false;
+    }
+    
+    return confirm('Are you sure you want to save this attendance record?');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Add Discipline Record - Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-plus me-2"></i>Add Discipline Record</h1>
+    <a href="{{ url_for('teacher.discipline_records') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Records
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Record Discipline Incident</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="student_id" class="form-label">
+                                <i class="fas fa-user-graduate me-1"></i>Student *
+                            </label>
+                            <select class="form-select" id="student_id" name="student_id" required>
+                                <option value="">Select a student</option>
+                                {% for student in students %}
+                                <option value="{{ student.user_id }}">
+                                    {{ student.user.full_name }} ({{ student.class_name }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="incident_date" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Incident Date *
+                            </label>
+                            <input type="date" class="form-control" id="incident_date" name="incident_date" 
+                                   value="{{ today }}" max="{{ today }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="incident_type" class="form-label">
+                            <i class="fas fa-tags me-1"></i>Incident Type *
+                        </label>
+                        <select class="form-select" id="incident_type" name="incident_type" required>
+                            <option value="">Select incident severity</option>
+                            <option value="minor">Minor - Minor behavioral issues</option>
+                            <option value="major">Major - Serious misconduct</option>
+                            <option value="severe">Severe - Serious violations requiring immediate action</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-file-alt me-1"></i>Description *
+                        </label>
+                        <textarea class="form-control" id="description" name="description" rows="4" 
+                                  placeholder="Provide detailed description of the incident..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="action_taken" class="form-label">
+                            <i class="fas fa-gavel me-1"></i>Action Taken
+                        </label>
+                        <textarea class="form-control" id="action_taken" name="action_taken" rows="3" 
+                                  placeholder="Describe any disciplinary actions taken (optional)"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('teacher.discipline_records') }}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Record
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

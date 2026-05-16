@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Program - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-graduation-cap me-2"></i>Edit Program</h1>
+    <a href="{{ url_for('admin.manage_programs') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Programs
+    </a>
+</div>
+
+<!-- Edit Program Form -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0"><i class="fas fa-edit me-2"></i>Program Information</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="name" class="form-label">Program Name</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ program.name }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="code" class="form-label">Program Code</label>
+                <input type="text" class="form-control" id="code" name="code" value="{{ program.code }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ program.description or '' }}</textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="duration" class="form-label">Duration (Years)</label>
+                <input type="number" class="form-control" id="duration" name="duration" value="{{ program.duration or '' }}" min="1" max="10">
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

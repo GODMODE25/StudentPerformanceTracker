@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-chart-bar me-2"></i>System Reports</h1>
+    <button onclick="window.print()" class="btn btn-secondary">
+        <i class="fas fa-print me-2"></i>Print Report
+    </button>
+</div>
+
+<!-- Overall Statistics -->
+<div class="row g-4 mb-5">
+    <div class="col-md-6">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                <h3 class="card-title">{{ avg_performance|round(2) }}%</h3>
+                <p class="card-text">Average Performance</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-check fa-3x text-info mb-3"></i>
+                <h3 class="card-title">{{ attendance_rate|round(2) }}%</h3>
+                <p class="card-text">Overall Attendance Rate</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Subject-wise Performance -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0"><i class="fas fa-book me-2"></i>Subject-wise Performance</h5>
+    </div>
+    <div class="card-body">
+        {% if subject_averages %}
+        <div class="row">
+            <div class="col-md-8">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Average Grade</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject, average in subject_averages.items() %}
+                            <tr>
+                                <td>{{ subject }}</td>
+                                <td>{{ average|round(2) }}%</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-{{ 'success' if average >= 80 else 'warning' if average >= 60 else 'danger' }}" 
+                                             role="progressbar" style="width: {{ average }}%" 
+                                             aria-valuenow="{{ average }}" aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <canvas id="subjectChart" width="300" height="300"></canvas>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-4">No subject data available</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Class-wise Statistics -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0"><i class="fas fa-school me-2"></i>Class-wise Statistics</h5>
+    </div>
+    <div class="card-body">
+        {% if class_stats %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Students</th>
+                        <th>Average Performance</th>
+                        <th>Average Attendance</th>
+                        <th>Performance Chart</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for class_name, stats in class_stats.items() %}
+                    <tr>
+                        <td><strong>{{ class_name }}</strong></td>
+                        <td>{{ stats.students }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if stats.avg_performance >= 80 else 'warning' if stats.avg_performance >= 60 else 'danger' }}">
+                                {{ stats.avg_performance|round(2) }}%
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if stats.avg_attendance >= 90 else 'warning' if stats.avg_attendance >= 80 else 'danger' }}">
+                                {{ stats.avg_attendance|round(2) }}%
+                            </span>
+                        </td>
+                        <td>
+                            <div class="progress" style="width: 150px;">
+                                <div class="progress-bar bg-{{ 'success' if stats.avg_performance >= 80 else 'warning' if stats.avg_performance >= 60 else 'danger' }}" 
+                                     role="progressbar" style="width: {{ stats.avg_performance }}%" 
+                                     aria-valuenow="{{ stats.avg_performance }}" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted text-center py-4">No class data available</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Performance Trends Chart -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0"><i class="fas fa-chart-area me-2"></i>Performance Overview</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Subject Performance Distribution</h6>
+                <canvas id="performanceChart" width="400" height="200"></canvas>
+            </div>
+            <div class="col-md-6">
+                <h6>Class Performance Comparison</h6>
+                <canvas id="classChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Subject Performance Chart
+{% if subject_averages %}
+const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+new Chart(subjectCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ subject_averages.keys() | list | tojson }},
+        datasets: [{
+            data: {{ subject_averages.values() | list | tojson }},
+            backgroundColor: [
+                '#198754', '#0dcaf0', '#ffc107', '#dc3545', '#6f42c1', '#fd7e14'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Performance Distribution Chart
+const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+new Chart(performanceCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ subject_averages.keys() | list | tojson }},
+        datasets: [{
+            label: 'Average Performance (%)',
+            data: {{ subject_averages.values() | list | tojson }},
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        }
+    }
+});
+{% endif %}
+
+// Class Performance Chart
+{% if class_stats %}
+const classCtx = document.getElementById('classChart').getContext('2d');
+new Chart(classCtx, {
+    type: 'radar',
+    data: {
+        labels: {{ class_stats.keys() | list | tojson }},
+        datasets: [{
+            label: 'Performance',
+            data: [{% for class_name, stats in class_stats.items() %}{{ stats.avg_performance|round(2) }}{% if not loop.last %},{% endif %}{% endfor %}],
+            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+        }, {
+            label: 'Attendance',
+            data: [{% for class_name, stats in class_stats.items() %}{{ stats.avg_attendance|round(2) }}{% if not loop.last %},{% endif %}{% endfor %}],
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            r: {
+                beginAtZero: true,
+                max: 100
+            }
+        }
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

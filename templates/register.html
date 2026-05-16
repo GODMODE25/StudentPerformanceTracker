@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Student Performance Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                    <h2 class="card-title">Create Account</h2>
+                    <p class="text-muted">Join the student performance tracking system</p>
+                </div>
+
+                <form method="POST" id="registerForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="username" class="form-label">
+                                <i class="fas fa-user me-1"></i>Username *
+                            </label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope me-1"></i>Email *
+                            </label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="full_name" class="form-label">
+                            <i class="fas fa-id-card me-1"></i>Full Name *
+                        </label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Password *
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password" required minlength="6">
+                            <div class="form-text">Minimum 6 characters</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="confirm_password" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Confirm Password *
+                            </label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="role" class="form-label">
+                            <i class="fas fa-user-tag me-1"></i>Role *
+                        </label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="">Select your role</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="parent">Parent</option>
+                        </select>
+                    </div>
+
+                    <!-- Student-specific fields -->
+                    <div id="studentFields" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="student_id" class="form-label">
+                                    <i class="fas fa-id-badge me-1"></i>Student ID
+                                </label>
+                                <input type="text" class="form-control" id="student_id" name="student_id" placeholder="Auto-generated if empty">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="class_name" class="form-label">
+                                    <i class="fas fa-school me-1"></i>Class/Grade
+                                </label>
+                                <select class="form-select" id="class_name" name="class_name">
+                                    <option value="Grade 9">Grade 9</option>
+                                    <option value="Grade 10">Grade 10</option>
+                                    <option value="Grade 11">Grade 11</option>
+                                    <option value="Grade 12">Grade 12</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="parent_contact" class="form-label">
+                                <i class="fas fa-phone me-1"></i>Parent Contact
+                            </label>
+                            <input type="text" class="form-control" id="parent_contact" name="parent_contact" placeholder="Parent email or phone">
+                        </div>
+                    </div>
+
+                    <!-- Teacher-specific fields -->
+                    <div id="teacherFields" class="d-none">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="employee_id" class="form-label">
+                                    <i class="fas fa-id-badge me-1"></i>Employee ID
+                                </label>
+                                <input type="text" class="form-control" id="employee_id" name="employee_id" placeholder="Auto-generated if empty">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="subjects" class="form-label">
+                                    <i class="fas fa-book me-1"></i>Subjects Taught
+                                </label>
+                                <input type="text" class="form-control" id="subjects" name="subjects" placeholder="e.g., Mathematics, Physics">
+                                <div class="form-text">Separate multiple subjects with commas</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="classes" class="form-label">
+                                    <i class="fas fa-users me-1"></i>Classes Taught
+                                </label>
+                                <input type="text" class="form-control" id="classes" name="classes" placeholder="e.g., Grade 10, Grade 11">
+                                <div class="form-text">Separate multiple classes with commas</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <p class="mb-0">Already have an account?</p>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('role').addEventListener('change', function() {
+    const role = this.value;
+    const studentFields = document.getElementById('studentFields');
+    const teacherFields = document.getElementById('teacherFields');
+    
+    // Hide all role-specific fields
+    studentFields.classList.add('d-none');
+    teacherFields.classList.add('d-none');
+    
+    // Show relevant fields based on role
+    if (role === 'student') {
+        studentFields.classList.remove('d-none');
+    } else if (role === 'teacher') {
+        teacherFields.classList.remove('d-none');
+    }
+});
+
+// Password confirmation validation
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    
+    if (password !== confirmPassword) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+    }
+});
+</script>
+{% endblock %}

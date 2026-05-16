@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Student Performance Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-cog me-2"></i>Admin Dashboard</h1>
+    <div>
+        <a href="{{ url_for('admin.manage_users') }}" class="btn btn-primary">
+            <i class="fas fa-users me-2"></i>Manage Users
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card text-center border-primary">
+            <div class="card-body">
+                <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                <h3 class="card-title">{{ stats.total_users }}</h3>
+                <p class="card-text text-muted">Total Users</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center border-info">
+            <div class="card-body">
+                <i class="fas fa-user-graduate fa-2x text-info mb-2"></i>
+                <h3 class="card-title">{{ stats.total_students }}</h3>
+                <p class="card-text text-muted">Students</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <i class="fas fa-chalkboard-teacher fa-2x text-warning mb-2"></i>
+                <h3 class="card-title">{{ stats.total_teachers }}</h3>
+                <p class="card-text text-muted">Teachers</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
+                <h3 class="card-title">{{ stats.total_grades }}</h3>
+                <p class="card-text text-muted">Total Grades</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Statistics -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-calendar-check fa-2x text-primary mb-2"></i>
+                <h4 class="card-title">{{ stats.total_attendance }}</h4>
+                <p class="card-text text-muted">Attendance Records</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-envelope fa-2x text-info mb-2"></i>
+                <h4 class="card-title">{{ stats.total_messages }}</h4>
+                <p class="card-text text-muted">Messages</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                <h4 class="card-title">{{ stats.total_discipline_records }}</h4>
+                <p class="card-text text-muted">Discipline Records</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Statistics Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <i class="fas fa-book fa-2x text-success mb-2"></i>
+                <h4 class="card-title">{{ stats.total_courses }}</h4>
+                <p class="card-text text-muted">Courses</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center border-info">
+            <div class="card-body">
+                <i class="fas fa-graduation-cap fa-2x text-info mb-2"></i>
+                <h4 class="card-title">{{ stats.total_programs }}</h4>
+                <p class="card-text text-muted">Programs</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center border-primary">
+            <div class="card-body">
+                <i class="fas fa-book-open fa-2x text-primary mb-2"></i>
+                <h4 class="card-title">{{ stats.total_enrollments }}</h4>
+                <p class="card-text text-muted">Enrollments</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center border-secondary">
+            <div class="card-body">
+                <i class="fas fa-clipboard-list fa-2x text-secondary mb-2"></i>
+                <h4 class="card-title">{{ stats.total_audit_logs }}</h4>
+                <p class="card-text text-muted">Audit Logs</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-star me-2"></i>Recent Grades</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_grades %}
+                <div class="list-group list-group-flush">
+                    {% for grade in recent_grades %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ grade.student_name }}</strong><br>
+                            <small class="text-muted">{{ grade.subject }} - {{ grade.exam_type.title() }}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-{{ 'success' if grade.percentage >= 80 else 'warning' if grade.percentage >= 60 else 'danger' }}">
+                                {{ grade.marks }}/{{ grade.max_marks }}
+                            </span><br>
+                            <small class="text-muted">{{ grade.percentage|round(1) }}%</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">No recent grades available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-envelope me-2"></i>Recent Messages</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_messages %}
+                <div class="list-group list-group-flush">
+                    {% for message in recent_messages %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ message.subject }}</h6>
+                            <small class="text-muted">{{ message.timestamp.strftime('%b %d') }}</small>
+                        </div>
+                        <p class="mb-1">{{ message.content[:50] }}{% if message.content|length > 50 %}...{% endif %}</p>
+                        <small class="text-muted">
+                            From: {{ message.sender.full_name }} → {{ message.receiver.full_name }}
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">No recent messages available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2 d-md-flex">
+                    <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary me-md-2">
+                        <i class="fas fa-user-plus me-2"></i>Add User
+                    </a>
+                    <a href="{{ url_for('admin.manage_students') }}" class="btn btn-info me-md-2">
+                        <i class="fas fa-user-graduate me-2"></i>Manage Students
+                    </a>
+                    <a href="{{ url_for('admin.manage_courses') }}" class="btn btn-success me-md-2">
+                        <i class="fas fa-book me-2"></i>Manage Courses
+                    </a>
+                    <a href="{{ url_for('admin.manage_programs') }}" class="btn btn-warning me-md-2">
+                        <i class="fas fa-graduation-cap me-2"></i>Manage Programs
+                    </a>
+                    <a href="{{ url_for('admin.manage_enrollments') }}" class="btn btn-secondary me-md-2">
+                        <i class="fas fa-book-open me-2"></i>Manage Enrollments
+                    </a>
+                    <a href="{{ url_for('admin.reports') }}" class="btn btn-info me-md-2">
+                        <i class="fas fa-chart-bar me-2"></i>View Reports
+                    </a>
+                    <a href="{{ url_for('admin.messages') }}" class="btn btn-warning me-md-2">
+                        <i class="fas fa-envelope-open me-2"></i>All Messages
+                    </a>
+                    <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-dark me-md-2">
+                        <i class="fas fa-clipboard-list me-2"></i>Audit Logs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

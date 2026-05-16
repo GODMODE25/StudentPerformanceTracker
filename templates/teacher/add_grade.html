@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}Add Grade - Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-plus me-2"></i>Add Grade</h1>
+    <a href="{{ url_for('teacher.manage_grades') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Grades
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-star me-2"></i>Enter Student Grade</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="student_id" class="form-label">
+                                <i class="fas fa-user-graduate me-1"></i>Student *
+                            </label>
+                            <select class="form-select" id="student_id" name="student_id" required>
+                                <option value="">Select a student</option>
+                                {% for student in students %}
+                                <option value="{{ student.user_id }}" 
+                                        {% if request.args.get('student_id') == student.user_id|string %}selected{% endif %}>
+                                    {{ student.user.full_name }} ({{ student.class_name }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="subject" class="form-label">
+                                <i class="fas fa-book me-1"></i>Subject *
+                            </label>
+                            <select class="form-select" id="subject" name="subject" required>
+                                <option value="">Select a subject</option>
+                                {% for subject in teacher.subjects %}
+                                <option value="{{ subject }}">{{ subject }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="exam_type" class="form-label">
+                                <i class="fas fa-clipboard-list me-1"></i>Exam Type *
+                            </label>
+                            <select class="form-select" id="exam_type" name="exam_type" required>
+                                <option value="">Select exam type</option>
+                                <option value="assignment">Assignment</option>
+                                <option value="quiz">Quiz</option>
+                                <option value="midterm">Midterm Exam</option>
+                                <option value="final">Final Exam</option>
+                                <option value="project">Project</option>
+                                <option value="presentation">Presentation</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="exam_date" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Exam Date *
+                            </label>
+                            <input type="date" class="form-control" id="exam_date" name="exam_date" 
+                                   value="{{ today }}" max="{{ today }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="marks" class="form-label">
+                                <i class="fas fa-trophy me-1"></i>Marks Obtained *
+                            </label>
+                            <input type="number" class="form-control" id="marks" name="marks" 
+                                   min="0" step="0.5" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="max_marks" class="form-label">
+                                <i class="fas fa-bullseye me-1"></i>Maximum Marks *
+                            </label>
+                            <input type="number" class="form-control" id="max_marks" name="max_marks" 
+                                   min="1" step="0.5" value="100" required>
+                        </div>
+                    </div>
+
+                    <!-- Grade Preview -->
+                    <div class="card bg-light mb-3" id="gradePreview" style="display: none;">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-calculator me-2"></i>Grade Preview</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>Percentage:</strong> <span id="percentagePreview">-</span>%
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Letter Grade:</strong> <span id="letterGradePreview">-</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Status:</strong> <span id="statusPreview">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('teacher.manage_grades') }}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Grade
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const marksInput = document.getElementById('marks');
+    const maxMarksInput = document.getElementById('max_marks');
+    const gradePreview = document.getElementById('gradePreview');
+    const percentagePreview = document.getElementById('percentagePreview');
+    const letterGradePreview = document.getElementById('letterGradePreview');
+    const statusPreview = document.getElementById('statusPreview');
+
+    function updatePreview() {
+        const marks = parseFloat(marksInput.value) || 0;
+        const maxMarks = parseFloat(maxMarksInput.value) || 100;
+        
+        if (marks > 0 && maxMarks > 0) {
+            const percentage = (marks / maxMarks) * 100;
+            const roundedPercentage = Math.round(percentage * 10) / 10;
+            
+            // Calculate letter grade
+            let letterGrade, status, badgeClass;
+            if (percentage >= 90) {
+                letterGrade = 'A';
+                status = 'Excellent';
+                badgeClass = 'success';
+            } else if (percentage >= 80) {
+                letterGrade = 'B';
+                status = 'Good';
+                badgeClass = 'info';
+            } else if (percentage >= 70) {
+                letterGrade = 'C';
+                status = 'Satisfactory';
+                badgeClass = 'warning';
+            } else if (percentage >= 60) {
+                letterGrade = 'D';
+                status = 'Needs Improvement';
+                badgeClass = 'secondary';
+            } else {
+                letterGrade = 'F';
+                status = 'Failing';
+                badgeClass = 'danger';
+            }
+            
+            percentagePreview.textContent = roundedPercentage;
+            letterGradePreview.innerHTML = `<span class="badge bg-${badgeClass}">${letterGrade}</span>`;
+            statusPreview.innerHTML = `<span class="text-${badgeClass}">${status}</span>`;
+            
+            gradePreview.style.display = 'block';
+        } else {
+            gradePreview.style.display = 'none';
+        }
+    }
+
+    // Validation to ensure marks don't exceed max marks
+    marksInput.addEventListener('input', function() {
+        const marks = parseFloat(this.value) || 0;
+        const maxMarks = parseFloat(maxMarksInput.value) || 100;
+        
+        if (marks > maxMarks) {
+            this.setCustomValidity('Marks cannot exceed maximum marks');
+        } else {
+            this.setCustomValidity('');
+        }
+        
+        updatePreview();
+    });
+
+    maxMarksInput.addEventListener('input', function() {
+        const marks = parseFloat(marksInput.value) || 0;
+        const maxMarks = parseFloat(this.value) || 100;
+        
+        if (marks > maxMarks) {
+            marksInput.setCustomValidity('Marks cannot exceed maximum marks');
+        } else {
+            marksInput.setCustomValidity('');
+        }
+        
+        updatePreview();
+    });
+});
+</script>
+{% endblock %}

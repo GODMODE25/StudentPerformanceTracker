@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}View Student - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-user-graduate me-2"></i>Student Details</h1>
+    <div>
+        <a href="{{ url_for('admin.edit_student', student_id=student.id) }}" class="btn btn-primary">
+            <i class="fas fa-edit me-2"></i>Edit Student
+        </a>
+        <a href="{{ url_for('admin.manage_students') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Students
+        </a>
+    </div>
+</div>
+
+<!-- Student Information -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-user me-2"></i>Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th>Full Name:</th>
+                        <td>{{ user.full_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Email:</th>
+                        <td>{{ user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Student ID:</th>
+                        <td>{{ student.student_id }}</td>
+                    </tr>
+                    <tr>
+                        <th>Class:</th>
+                        <td>{{ student.class_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date of Birth:</th>
+                        <td>{{ student.date_of_birth.strftime('%Y-%m-%d') if student.date_of_birth else 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Address:</th>
+                        <td>{{ student.address or 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Parent Contact:</th>
+                        <td>{{ student.parent_contact or 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Emergency Contact:</th>
+                        <td>{{ student.emergency_contact or 'N/A' }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-chart-line me-2"></i>Academic Summary</h5>
+            </div>
+            <div class="card-body">
+                {% set grades = student.user.grades_received %}
+                {% if grades %}
+                <p><strong>Total Grades Recorded:</strong> {{ grades|length }}</p>
+                {% set avg_grade = grades|sum(attribute='percentage') / grades|length %}
+                <p><strong>Average Performance:</strong> {{ avg_grade|round(2) }}%</p>
+                {% else %}
+                <p>No grades recorded yet.</p>
+                {% endif %}
+                
+                {% set attendance = student.user.attendance_records %}
+                {% if attendance %}
+                <p><strong>Total Attendance Records:</strong> {{ attendance|length }}</p>
+                {% set present_count = attendance|selectattr('status', 'equalto', 'present')|list|length %}
+                {% set attendance_rate = (present_count / attendance|length) * 100 %}
+                <p><strong>Attendance Rate:</strong> {{ attendance_rate|round(2) }}%</p>
+                {% else %}
+                <p>No attendance records yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enrollments -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0"><i class="fas fa-book me-2"></i>Course Enrollments</h5>
+    </div>
+    <div class="card-body">
+        {% if enrollments %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Course Code</th>
+                        <th>Enrollment Date</th>
+                        <th>Status</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrollments %}
+                    <tr>
+                        <td>{{ enrollment.course.name }}</td>
+                        <td>{{ enrollment.course.code }}</td>
+                        <td>{{ enrollment.enrollment_date.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if enrollment.status == 'active' else 'warning' if enrollment.status == 'completed' else 'danger' }}">
+                                {{ enrollment.status.title() }}
+                            </span>
+                        </td>
+                        <td>{{ enrollment.grade or 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No course enrollments found.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

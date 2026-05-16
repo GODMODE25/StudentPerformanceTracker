@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Messages - Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-envelope me-2"></i>Messages</h1>
+    <a href="{{ url_for('teacher.send_message') }}" class="btn btn-primary">
+        <i class="fas fa-paper-plane me-2"></i>Send Message
+    </a>
+</div>
+
+<!-- Message Navigation -->
+<div class="row mb-4">
+    <div class="col-12">
+        <ul class="nav nav-tabs" id="messageTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="received-tab" data-bs-toggle="tab" data-bs-target="#received" 
+                        type="button" role="tab" aria-controls="received" aria-selected="true">
+                    <i class="fas fa-inbox me-2"></i>Received ({{ received_messages|length }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sent-tab" data-bs-toggle="tab" data-bs-target="#sent" 
+                        type="button" role="tab" aria-controls="sent" aria-selected="false">
+                    <i class="fas fa-paper-plane me-2"></i>Sent ({{ sent_messages|length }})
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Message Content -->
+<div class="tab-content" id="messageTabContent">
+    <!-- Received Messages -->
+    <div class="tab-pane fade show active" id="received" role="tabpanel" aria-labelledby="received-tab">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-inbox me-2"></i>Received Messages</h5>
+            </div>
+            <div class="card-body">
+                {% if received_messages %}
+                <div class="list-group list-group-flush">
+                    {% for message in received_messages %}
+                    <div class="list-group-item {% if not message.read %}border-start border-primary border-3{% endif %}">
+                        <div class="d-flex w-100 justify-content-between">
+                            <div class="d-flex align-items-center">
+                                {% if not message.read %}
+                                <i class="fas fa-circle text-primary me-2" style="font-size: 0.5rem;"></i>
+                                {% endif %}
+                                <h6 class="mb-1 {% if not message.read %}fw-bold{% endif %}">{{ message.subject }}</h6>
+                            </div>
+                            <small class="text-muted">{{ message.timestamp.strftime('%b %d, %Y at %I:%M %p') }}</small>
+                        </div>
+                        <p class="mb-1">{{ message.content }}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-user me-1"></i>From: {{ message.sender.full_name }}
+                            {% if message.sender.role == 'student' %}
+                                (Student)
+                            {% elif message.sender.role == 'parent' %}
+                                (Parent)
+                            {% elif message.sender.role == 'admin' %}
+                                (Administrator)
+                            {% endif %}
+                        </small>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline-primary" onclick="replyToMessage({{ message.sender_id }}, '{{ message.subject }}')">
+                                <i class="fas fa-reply me-1"></i>Reply
+                            </button>
+                            {% if not message.read %}
+                            <a href="{{ url_for('teacher.mark_as_read', message_id=message.id) }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-check me-1"></i>Mark as Read
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No messages received</h5>
+                    <p class="text-muted">Your received messages will appear here</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sent Messages -->
+    <div class="tab-pane fade" id="sent" role="tabpanel" aria-labelledby="sent-tab">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-paper-plane me-2"></i>Sent Messages</h5>
+            </div>
+            <div class="card-body">
+                {% if sent_messages %}
+                <div class="list-group list-group-flush">
+                    {% for message in sent_messages %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ message.subject }}</h6>
+                            <small class="text-muted">{{ message.timestamp.strftime('%b %d, %Y at %I:%M %p') }}</small>
+                        </div>
+                        <p class="mb-1">{{ message.content }}</p>
+                        <small class="text-muted">
+                            <i class="fas fa-user me-1"></i>To: {{ message.receiver.full_name }}
+                            {% if message.receiver.role == 'student' %}
+                                (Student)
+                            {% elif message.receiver.role == 'parent' %}
+                                (Parent)
+                            {% elif message.receiver.role == 'admin' %}
+                                (Administrator)
+                            {% endif %}
+                            {% if message.read %}
+                                <span class="badge bg-success ms-2">Read</span>
+                            {% else %}
+                                <span class="badge bg-secondary ms-2">Unread</span>
+                            {% endif %}
+                        </small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-paper-plane fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No messages sent</h5>
+                    <p class="text-muted">Your sent messages will appear here</p>
+                    <a href="{{ url_for('teacher.send_message') }}" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Send Your First Message
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reply Modal -->
+<div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="replyModalLabel">Reply to Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('teacher.send_message') }}" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" id="reply-receiver-id" name="receiver_id">
+                    <div class="mb-3">
+                        <label for="reply-subject" class="form-label">Subject</label>
+                        <input type="text" class="form-control" id="reply-subject" name="subject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reply-content" class="form-label">Message</label>
+                        <textarea class="form-control" id="reply-content" name="content" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Send Reply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function replyToMessage(receiverId, originalSubject) {
+    document.getElementById('reply-receiver-id').value = receiverId;
+    document.getElementById('reply-subject').value = 'Re: ' + originalSubject;
+    document.getElementById('reply-content').focus();
+    
+    const modal = new bootstrap.Modal(document.getElementById('replyModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

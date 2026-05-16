@@ -1,0 +1,101 @@
+{% extends "admin/dashboard.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Create New User</h2>
+    <form action="{{ url_for('admin.create_user') }}" method="post">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="full_name">Full Name</label>
+            <input type="text" class="form-control" id="full_name" name="full_name" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="form-group">
+            <label for="role">Role</label>
+            <select class="form-control" id="role" name="role">
+                <option value="admin">Admin</option>
+                <option value="teacher">Teacher</option>
+                <option value="student">Student</option>
+                <option value="parent">Parent</option>
+            </select>
+        </div>
+        
+        <!-- Student-specific fields (hidden by default) -->
+        <div id="student-fields" style="display: none;">
+            <div class="form-group">
+                <label for="student_id">Student ID</label>
+                <input type="text" class="form-control" id="student_id" name="student_id">
+            </div>
+            <div class="form-group">
+                <label for="class_name">Class</label>
+                <input type="text" class="form-control" id="class_name" name="class_name">
+            </div>
+            <div class="form-group">
+                <label for="date_of_birth">Date of Birth</label>
+                <input type="date" class="form-control" id="date_of_birth" name="date_of_birth">
+            </div>
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea class="form-control" id="address" name="address" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="parent_contact">Parent Contact</label>
+                <input type="text" class="form-control" id="parent_contact" name="parent_contact">
+            </div>
+            <div class="form-group">
+                <label for="emergency_contact">Emergency Contact</label>
+                <input type="text" class="form-control" id="emergency_contact" name="emergency_contact">
+            </div>
+        </div>
+        
+        <!-- Teacher-specific fields (hidden by default) -->
+        <div id="teacher-fields" style="display: none;">
+            <div class="form-group">
+                <label for="employee_id">Employee ID</label>
+                <input type="text" class="form-control" id="employee_id" name="employee_id">
+            </div>
+            <div class="form-group">
+                <label for="subjects">Subjects (comma-separated)</label>
+                <input type="text" class="form-control" id="subjects" name="subjects">
+            </div>
+            <div class="form-group">
+                <label for="classes">Classes (comma-separated)</label>
+                <input type="text" class="form-control" id="classes" name="classes">
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Create User</button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('role');
+    const studentFields = document.getElementById('student-fields');
+    const teacherFields = document.getElementById('teacher-fields');
+    
+    roleSelect.addEventListener('change', function() {
+        // Hide all role-specific fields
+        studentFields.style.display = 'none';
+        teacherFields.style.display = 'none';
+        
+        // Show fields for selected role
+        if (this.value === 'student') {
+            studentFields.style.display = 'block';
+        } else if (this.value === 'teacher') {
+            teacherFields.style.display = 'block';
+        }
+    });
+});
+</script>
+{% endblock %}

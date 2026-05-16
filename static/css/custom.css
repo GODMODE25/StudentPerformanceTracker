@@ -1,0 +1,436 @@
+/* Custom CSS for Student Performance Tracker */
+/* Minimal overrides to complement the Replit Bootstrap theme */
+
+:root {
+    --spt-primary: var(--bs-primary);
+    --spt-success: var(--bs-success);
+    --spt-warning: var(--bs-warning);
+    --spt-danger: var(--bs-danger);
+    --spt-info: var(--bs-info);
+    --spt-secondary: var(--bs-secondary);
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Smooth transitions for interactive elements */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced button styles */
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Loading states */
+.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid var(--bs-primary);
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Custom progress bars */
+.progress-animated .progress-bar {
+    animation: progress-bar-stripes 1s linear infinite;
+}
+
+/* Grade badges with custom colors */
+.grade-a {
+    background-color: var(--bs-success) !important;
+}
+
+.grade-b {
+    background-color: var(--bs-info) !important;
+}
+
+.grade-c {
+    background-color: var(--bs-warning) !important;
+}
+
+.grade-d {
+    background-color: var(--bs-secondary) !important;
+}
+
+.grade-f {
+    background-color: var(--bs-danger) !important;
+}
+
+/* Calendar styles for attendance view */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background-color: var(--bs-border-color);
+    border: 1px solid var(--bs-border-color);
+}
+
+.calendar-day {
+    background-color: var(--bs-body-bg);
+    padding: 8px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.calendar-day:hover {
+    background-color: var(--bs-secondary-bg);
+}
+
+.calendar-day.present {
+    background-color: rgba(25, 135, 84, 0.1);
+    border-left: 3px solid var(--bs-success);
+}
+
+.calendar-day.absent {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-left: 3px solid var(--bs-danger);
+}
+
+.calendar-day.late {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-left: 3px solid var(--bs-warning);
+}
+
+.calendar-day.today {
+    border: 2px solid var(--bs-primary);
+    font-weight: bold;
+}
+
+/* Enhanced table styles */
+.table-responsive {
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+
+/* Message styles */
+.message-unread {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-left: 3px solid var(--bs-primary);
+}
+
+.message-item {
+    transition: background-color 0.2s ease;
+}
+
+.message-item:hover {
+    background-color: var(--bs-secondary-bg);
+}
+
+/* Dashboard statistics cards */
+.stat-card {
+    background: linear-gradient(135deg, var(--bs-primary), var(--bs-primary-rgb));
+    color: white;
+    border: none;
+}
+
+.stat-card .card-body {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.stat-card i {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+/* Performance indicators */
+.performance-excellent {
+    color: var(--bs-success);
+}
+
+.performance-good {
+    color: var(--bs-info);
+}
+
+.performance-average {
+    color: var(--bs-warning);
+}
+
+.performance-poor {
+    color: var(--bs-danger);
+}
+
+/* Custom form enhancements */
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    opacity: 0.65;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #dee2e6 !important;
+    }
+    
+    .btn {
+        display: none !important;
+    }
+    
+    .navbar {
+        display: none !important;
+    }
+    
+    .alert {
+        display: none !important;
+    }
+}
+
+/* Mobile responsiveness enhancements */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-group-vertical .btn {
+        margin-bottom: 0.5rem;
+    }
+    
+    .d-md-flex {
+        flex-direction: column;
+    }
+    
+    .d-md-flex .btn {
+        margin-bottom: 0.5rem;
+        margin-right: 0 !important;
+    }
+}
+
+/* Accessibility improvements */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus styles for better accessibility */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bs-secondary-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bs-secondary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-secondary-color);
+}
+
+/* Fade in animations for page load */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-in-out;
+}
+
+/* Enhanced dropdown styles */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border-radius: 0.5rem;
+}
+
+.dropdown-item {
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+/* Status indicators */
+.status-online {
+    position: relative;
+}
+
+.status-online::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 12px;
+    height: 12px;
+    background-color: var(--bs-success);
+    border: 2px solid var(--bs-body-bg);
+    border-radius: 50%;
+}
+
+/* Custom tooltip styles */
+.tooltip-inner {
+    background-color: var(--bs-dark);
+    color: var(--bs-light);
+    font-size: 0.875rem;
+}
+
+.tooltip .tooltip-arrow {
+    color: var(--bs-dark);
+}
+
+/* Enhanced modal styles */
+.modal-content {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--bs-border-color);
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--bs-border-color);
+    border-radius: 0 0 0.75rem 0.75rem;
+}
+
+/* Error and success states */
+.has-error .form-control {
+    border-color: var(--bs-danger);
+}
+
+.has-success .form-control {
+    border-color: var(--bs-success);
+}
+
+/* Custom spacing utilities */
+.mt-6 {
+    margin-top: 3.5rem !important;
+}
+
+.mb-6 {
+    margin-bottom: 3.5rem !important;
+}
+
+.pt-6 {
+    padding-top: 3.5rem !important;
+}
+
+.pb-6 {
+    padding-bottom: 3.5rem !important;
+}
+
+/* Centered cards for user roles section */
+.centered-cards {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+    padding: 2rem 0;
+}
+
+.centered-cards .card {
+    margin: 0 1rem;
+    flex: 1 1 auto;
+    max-width: 300px;
+}
+
+/* Responsive adjustments for centered cards */
+@media (max-width: 992px) {
+    .centered-cards {
+        flex-direction: column;
+    }
+    
+    .centered-cards .card {
+        margin: 1rem 0;
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+@media (min-width: 992px) {
+    .centered-cards {
+        flex-direction: row;
+    }
+}

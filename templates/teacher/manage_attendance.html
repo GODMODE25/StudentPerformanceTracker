@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Attendance - Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-calendar-check me-2"></i>Manage Attendance</h1>
+    <a href="{{ url_for('teacher.mark_attendance') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Mark Attendance
+    </a>
+</div>
+
+<!-- Attendance Overview -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0"><i class="fas fa-chart-bar me-2"></i>Attendance Summary</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for class_name in teacher.classes %}
+            <div class="col-md-4 mb-3">
+                <div class="card border-info">
+                    <div class="card-body text-center">
+                        <i class="fas fa-school fa-2x text-info mb-2"></i>
+                        <h6 class="card-title">{{ class_name }}</h6>
+                        {% set class_students = students|selectattr('class_name', 'equalto', class_name)|list %}
+                        <p class="card-text">{{ class_students|length }} Students</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Attendance by Date -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0"><i class="fas fa-calendar me-2"></i>Attendance Records</h5>
+    </div>
+    <div class="card-body">
+        {% if attendance_by_date %}
+        <div class="accordion" id="attendanceAccordion">
+            {% for date, records in attendance_by_date.items() %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ loop.index }}">
+                    <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" 
+                            data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" 
+                            aria-expanded="{% if loop.first %}true{% else %}false{% endif %}" 
+                            aria-controls="collapse{{ loop.index }}">
+                        <div class="d-flex justify-content-between w-100 me-3">
+                            <span><i class="fas fa-calendar-day me-2"></i>{{ date }}</span>
+                            <span class="badge bg-info">{{ records|length }} Records</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="collapse{{ loop.index }}" 
+                     class="accordion-collapse collapse {% if loop.first %}show{% endif %}" 
+                     aria-labelledby="heading{{ loop.index }}" 
+                     data-bs-parent="#attendanceAccordion">
+                    <div class="accordion-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Class</th>
+                                        <th>Status</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in records %}
+                                    <tr>
+                                        <td>
+                                            <i class="fas fa-user-graduate me-2 text-info"></i>
+                                            {{ record.student.user.full_name }}
+                                        </td>
+                                        <td>{{ record.student.class_name }}</td>
+                                        <td>
+                                            {% if record.status == 'present' %}
+                                                <span class="badge bg-success">Present</span>
+                                            {% elif record.status == 'absent' %}
+                                                <span class="badge bg-danger">Absent</span>
+                                            {% elif record.status == 'late' %}
+                                                <span class="badge bg-warning">Late</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ record.remarks or '-' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No attendance records found</h5>
+            <p class="text-muted">Start by marking attendance for your students</p>
+            <a href="{{ url_for('teacher.mark_attendance') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Mark Attendance
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Student Attendance Statistics -->
+{% if students %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-chart-pie me-2"></i>Student Attendance Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for student in students[:6] %}
+                    {% set student_attendance = attendance_by_date.values()|list|flatten|selectattr('student_id', 'equalto', student.user_id)|list %}
+                    {% set total_days = student_attendance|length %}
+                    {% set present_days = student_attendance|selectattr('status', 'equalto', 'present')|list|length %}
+                    {% set attendance_rate = (present_days / total_days * 100) if total_days > 0 else 0 %}
+
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-{{ 'success' if attendance_rate >= 90 else 'warning' if attendance_rate >= 80 else 'danger' }}">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ student.user.full_name }}</h6>
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">{{ student.class_name }}</small>
+                                    <span class="badge bg-{{ 'success' if attendance_rate >= 90 else 'warning' if attendance_rate >= 80 else 'danger' }}">
+                                        {{ attendance_rate|round(1) }}%
+                                    </span>
+                                </div>
+                                <div class="progress mt-2" style="height: 5px;">
+                                    <div class="progress-bar bg-{{ 'success' if attendance_rate >= 90 else 'warning' if attendance_rate >= 80 else 'danger' }}" 
+                                         role="progressbar" style="width: {{ attendance_rate }}%" 
+                                         aria-valuenow="{{ attendance_rate }}" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <small class="text-muted">{{ present_days }}/{{ total_days }} days present</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if students|length > 6 %}
+                <div class="text-center mt-3">
+                    <button class="btn btn-outline-secondary" onclick="toggleMoreStudents()">
+                        <i class="fas fa-chevron-down me-2"></i>Show More Students
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function toggleMoreStudents() {
+    // This would expand to show more students in a real implementation
+    alert('Feature to show more students would be implemented here');
+}
+</script>
+{% endblock %}

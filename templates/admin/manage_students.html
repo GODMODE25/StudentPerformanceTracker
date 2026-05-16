@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Students - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-user-graduate me-2"></i>Manage Students</h1>
+    <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">
+        <i class="fas fa-user-plus me-2"></i>Add New Student
+    </a>
+</div>
+
+<!-- Students Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">All Students</h5>
+    </div>
+    <div class="card-body">
+        {% if students %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Student ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Class</th>
+                        <th>Date of Birth</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.id }}</td>
+                        <td>{{ student.student_id }}</td>
+                        <td>{{ student.user.full_name if student.user else 'N/A' }}</td>
+                        <td>{{ student.user.email if student.user else 'N/A' }}</td>
+                        <td>{{ student.class_name }}</td>
+                        <td>{{ student.date_of_birth.strftime('%Y-%m-%d') if student.date_of_birth else 'N/A' }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.view_student', student_id=student.id) }}" class="btn btn-sm btn-outline-info">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{{ url_for('admin.edit_student', student_id=student.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-user-graduate fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No students found</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

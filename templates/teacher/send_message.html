@@ -1,0 +1,215 @@
+
+{% extends "base.html" %}
+
+{% block title %}Send Message - Student Performance Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-paper-plane me-2"></i>Send Message
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="receiver_id" class="form-label">
+                            <i class="fas fa-user me-1"></i>Recipient *
+                        </label>
+                        <select class="form-select" id="receiver_id" name="receiver_id" required>
+                            <option value="">Select recipient...</option>
+                            {% for user in recipients %}
+                            <option value="{{ user.id }}">{{ user.full_name }} ({{ user.role.title() }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="subject" class="form-label">
+                            <i class="fas fa-tag me-1"></i>Subject *
+                        </label>
+                        <input type="text" class="form-control" id="subject" name="subject" 
+                               placeholder="Enter message subject" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="content" class="form-label">
+                            <i class="fas fa-edit me-1"></i>Message Content *
+                        </label>
+                        <textarea class="form-control" id="content" name="content" rows="6" 
+                                  placeholder="Type your message here..." required maxlength="500"></textarea>
+                        <div class="form-text">
+                            <span id="charCount">0</span>/500 characters
+                        </div>
+                    </div>
+
+                    <!-- Message Templates -->
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <i class="fas fa-templates me-1"></i>Quick Templates
+                        </label>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-outline-secondary btn-sm w-100" 
+                                        onclick="useTemplate('meeting', 'Parent-Teacher Meeting', 'Dear Parent, I would like to schedule a meeting to discuss your child\'s academic progress. Please let me know your availability.')">
+                                    Meeting Request
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-outline-secondary btn-sm w-100" 
+                                        onclick="useTemplate('performance', 'Academic Performance Update', 'I wanted to update you on your child\'s recent academic performance and discuss areas for improvement.')">
+                                    Performance Update
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-outline-secondary btn-sm w-100" 
+                                        onclick="useTemplate('reminder', 'Assignment Reminder', 'This is a friendly reminder about the upcoming assignment deadline. Please ensure submission by the due date.')">
+                                    Assignment Reminder
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('teacher.messages') }}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="button" class="btn btn-outline-primary me-md-2" onclick="saveDraft()">
+                            <i class="fas fa-save me-2"></i>Save Draft
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Send Message
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Card -->
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="card" id="previewCard" style="display: none;">
+            <div class="card-header">
+                <h6 class="card-title mb-0"><i class="fas fa-eye me-2"></i>Message Preview</h6>
+            </div>
+            <div class="card-body">
+                <div class="border p-3 rounded">
+                    <div class="mb-2">
+                        <strong>To:</strong> <span id="previewRecipient">-</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Subject:</strong> <span id="previewSubject">-</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Message:</strong>
+                    </div>
+                    <div id="previewContent" class="bg-light p-2 rounded">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const contentTextarea = document.getElementById('content');
+    const charCount = document.getElementById('charCount');
+    const subjectInput = document.getElementById('subject');
+    const receiverSelect = document.getElementById('receiver_id');
+    const previewCard = document.getElementById('previewCard');
+    
+    // Character count
+    contentTextarea.addEventListener('input', function() {
+        const count = this.value.length;
+        charCount.textContent = count;
+        
+        if (count > 500) {
+            charCount.parentElement.classList.add('text-danger');
+            this.setCustomValidity('Message is too long (maximum 500 characters)');
+        } else {
+            charCount.parentElement.classList.remove('text-danger');
+            this.setCustomValidity('');
+        }
+        
+        updatePreview();
+    });
+    
+    // Update preview when fields change
+    subjectInput.addEventListener('input', updatePreview);
+    receiverSelect.addEventListener('change', updatePreview);
+    
+    function updatePreview() {
+        const subject = subjectInput.value.trim();
+        const content = contentTextarea.value.trim();
+        const receiverOption = receiverSelect.selectedOptions[0];
+        const recipient = receiverOption ? receiverOption.textContent : '-';
+        
+        if (subject && content && recipient !== '-') {
+            document.getElementById('previewRecipient').textContent = recipient;
+            document.getElementById('previewSubject').textContent = subject;
+            document.getElementById('previewContent').textContent = content;
+            previewCard.style.display = 'block';
+        } else {
+            previewCard.style.display = 'none';
+        }
+    }
+
+    // Load draft on page load
+    const draft = localStorage.getItem('message_draft');
+    if (draft) {
+        try {
+            const draftData = JSON.parse(draft);
+            if (confirm('You have a saved draft. Would you like to load it?')) {
+                subjectInput.value = draftData.subject || '';
+                contentTextarea.value = draftData.content || '';
+                
+                // Trigger events to update character count and preview
+                contentTextarea.dispatchEvent(new Event('input'));
+                subjectInput.dispatchEvent(new Event('input'));
+                
+                // Clear the draft
+                localStorage.removeItem('message_draft');
+            }
+        } catch (e) {
+            console.error('Error loading draft:', e);
+        }
+    }
+});
+
+function useTemplate(type, subject, content) {
+    document.getElementById('subject').value = subject;
+    document.getElementById('content').value = content;
+    
+    // Trigger events to update character count and preview
+    document.getElementById('content').dispatchEvent(new Event('input'));
+    document.getElementById('subject').dispatchEvent(new Event('input'));
+    
+    // Focus on the content area for editing
+    document.getElementById('content').focus();
+}
+
+function saveDraft() {
+    const subject = document.getElementById('subject').value.trim();
+    const content = document.getElementById('content').value.trim();
+    
+    if (!subject && !content) {
+        alert('Nothing to save as draft.');
+        return;
+    }
+    
+    localStorage.setItem('message_draft', JSON.stringify({
+        subject: subject,
+        content: content,
+        timestamp: new Date().toISOString()
+    }));
+    
+    alert('Draft saved successfully!');
+}
+</script>
+{% endblock %}

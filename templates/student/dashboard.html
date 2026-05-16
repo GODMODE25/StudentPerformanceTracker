@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - Student Performance Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-user-graduate me-2"></i>Student Dashboard</h1>
+    <div>
+        <span class="text-muted">Welcome, {{ student.user.full_name }}</span>
+    </div>
+</div>
+
+<!-- Student Info Card -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h4 class="card-title mb-0">{{ student.user.full_name }}</h4>
+                        <p class="card-text mb-0">
+                            Student ID: {{ student.student_id }} | Class: {{ student.class_name }}
+                            {% if student.parent_contact %}
+                            | Parent Contact: {{ student.parent_contact }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <i class="fas fa-graduation-cap fa-3x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card text-center border-success">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
+                <h3 class="card-title">{{ stats.average_grade }}%</h3>
+                <p class="card-text text-muted">Average Grade</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center border-info">
+            <div class="card-body">
+                <i class="fas fa-calendar-check fa-2x text-info mb-2"></i>
+                <h3 class="card-title">{{ stats.attendance_percentage }}%</h3>
+                <p class="card-text text-muted">Attendance</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center border-warning">
+            <div class="card-body">
+                <i class="fas fa-book fa-2x text-warning mb-2"></i>
+                <h3 class="card-title">{{ stats.subjects_count }}</h3>
+                <p class="card-text text-muted">Subjects</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center border-secondary">
+            <div class="card-body">
+                <i class="fas fa-envelope fa-2x text-secondary mb-2"></i>
+                <h3 class="card-title">{{ unread_messages|length }}</h3>
+                <p class="card-text text-muted">Unread Messages</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Overview -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-chart-bar me-2"></i>Performance Overview</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-trophy me-2"></i>Academic Highlights</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Highest Grade:</strong>
+                    <span class="badge bg-success float-end">{{ stats.highest_grade }}%</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Total Grades:</strong>
+                    <span class="badge bg-info float-end">{{ stats.total_grades }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Present Days:</strong>
+                    <span class="badge bg-primary float-end">{{ stats.present_days }}</span>
+                </div>
+                {% if discipline_count > 0 %}
+                <div class="mb-3">
+                    <strong>Discipline Records:</strong>
+                    <span class="badge bg-warning float-end">{{ discipline_count }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-clock me-2"></i>Recent Grades</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_grades %}
+                <div class="list-group list-group-flush">
+                    {% for grade in recent_grades %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ grade.subject }}</strong><br>
+                            <small class="text-muted">{{ grade.exam_type.title() }} - {{ grade.date.strftime('%b %d') }}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-{{ 'success' if grade.percentage >= 80 else 'warning' if grade.percentage >= 60 else 'danger' }}">
+                                {{ grade.marks }}/{{ grade.max_marks }}
+                            </span><br>
+                            <small class="text-muted">{{ grade.percentage|round(1) }}%</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-3">
+                    <a href="{{ url_for('student.view_grades') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-star me-2"></i>View All Grades
+                    </a>
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">No grades available yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-calendar me-2"></i>Recent Attendance</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_attendance %}
+                <div class="list-group list-group-flush">
+                    {% for record in recent_attendance %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ record.date.strftime('%B %d, %Y') }}</strong><br>
+                            {% if record.remarks %}
+                            <small class="text-muted">{{ record.remarks }}</small>
+                            {% endif %}
+                        </div>
+                        <div>
+                            {% if record.status == 'present' %}
+                                <span class="badge bg-success">Present</span>
+                            {% elif record.status == 'absent' %}
+                                <span class="badge bg-danger">Absent</span>
+                            {% elif record.status == 'late' %}
+                                <span class="badge bg-warning">Late</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-3">
+                    <a href="{{ url_for('student.view_attendance') }}" class="btn btn-outline-info">
+                        <i class="fas fa-calendar-check me-2"></i>View Full Attendance
+                    </a>
+                </div>
+                {% else %}
+                <p class="text-muted text-center py-3">No attendance records available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Unread Messages Alert -->
+{% if unread_messages %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="fas fa-envelope me-2"></i>
+            <strong>You have {{ unread_messages|length }} unread message{{ 's' if unread_messages|length != 1 else '' }}!</strong>
+            <a href="{{ url_for('student.messages') }}" class="alert-link">Click here to read them.</a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2 d-md-flex">
+                    <a href="{{ url_for('student.view_grades') }}" class="btn btn-primary me-md-2">
+                        <i class="fas fa-star me-2"></i>View Grades
+                    </a>
+                    <a href="{{ url_for('student.view_attendance') }}" class="btn btn-info me-md-2">
+                        <i class="fas fa-calendar-check me-2"></i>Check Attendance
+                    </a>
+                    <a href="{{ url_for('student.messages') }}" class="btn btn-warning me-md-2">
+                        <i class="fas fa-envelope me-2"></i>Messages
+                    </a>
+                    <a href="{{ url_for('student.reports') }}" class="btn btn-secondary">
+                        <i class="fas fa-chart-line me-2"></i>View Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load performance chart data
+fetch(`/api/performance-data/{{ student.user_id }}`)
+    .then(response => response.json())
+    .then(data => {
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Average Grade (%)',
+                    data: data.data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error loading performance data:', error);
+        document.getElementById('performanceChart').style.display = 'none';
+    });
+</script>
+{% endblock %}
