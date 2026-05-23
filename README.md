@@ -11,6 +11,16 @@ A comprehensive web application designed to help educational institutions track 
 * **Messaging System:** Built-in communication platform allowing seamless interaction between teachers, students, parents, and administration.
 * **Data Visualization:** Interactive charts and dashboards utilizing Chart.js to visualize performance trends.
 
+## Screenshots
+
+<div align="center">
+  <img src="screenshots/homepage.png" alt="Homepage" width="600"/>
+  <br><br>
+  <img src="screenshots/login.png" alt="Login Page" width="400"/>
+  <br><br>
+  <img src="screenshots/admin_page.png" alt="Admin Dashboard" width="600"/>
+</div>
+
 ## Tech Stack
 
 * **Backend:** Python, Flask, Flask-SQLAlchemy, Flask-Login
